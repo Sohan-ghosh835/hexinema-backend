@@ -1,6 +1,6 @@
 console.log("script.js loaded");
 
-const BACKEND_URL = "http://127.0.0.1:8000"; // Change this to your Render URL
+const BACKEND_URL = "https://hexinema-backend.onrender.com";
 const WS_URL = BACKEND_URL.replace(/^http/, 'ws');
 
 let username = sessionStorage.getItem("username");
@@ -68,7 +68,7 @@ function initYoutube() {
   if (window.YT && window.YT.Player) {
     createYtPlayer();
   } else {
-    // Poll for YT.Player
+
     const checkYT = setInterval(() => {
       if (window.YT && window.YT.Player) {
         clearInterval(checkYT);
@@ -170,7 +170,7 @@ function initializeWebSocket() {
       setTimeout(() => { isRemoteUpdate = false; }, 250);
     }
 
-    // WebRTC Signaling
+
     if (data.action === "webrtc_offer") {
       if (data.targetId !== clientId) return;
       handleOffer(data.offer, data.senderId);
@@ -202,7 +202,7 @@ function initializeWebSocket() {
   };
 
   ws.onopen = () => {
-    // If we join late as a viewer, ask the host for the stream
+
     if (!isHost && roomMediaType === "screen") {
       ws.send(JSON.stringify({ action: "request_stream", clientId }));
     }
@@ -236,7 +236,7 @@ video.onseeked = () => {
   sendSync(!video.paused, video.currentTime);
 };
 
-// WebRTC Screen Sharing Logic
+
 
 startScreenShareBtn.onclick = async () => {
   try {

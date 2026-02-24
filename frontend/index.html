@@ -32,7 +32,7 @@
 
     </div>
 
-    <!-- Modals -->
+
     <div id="createTypeOverlay" class="overlay" style="display: none;">
       <div class="modal">
         <h3>Select Media Type</h3>
@@ -66,21 +66,21 @@
   </main>
 
   <script>
-    const BACKEND_URL = "http://127.0.0.1:8000"; // Change this to your Render URL
+    const BACKEND_URL = "https://hexinema-backend.onrender.com";
 
     const joinBtn = document.getElementById("joinBtn");
     const roomInput = document.getElementById("roomInput");
 
-    // Create Flow Elements
+
     const openCreateOverlayBtn = document.getElementById("openCreateOverlayBtn");
 
-    // Overlays
+
     const createTypeOverlay = document.getElementById("createTypeOverlay");
     const youtubeUrlOverlay = document.getElementById("youtubeUrlOverlay");
     const uploadOverlay = document.getElementById("uploadOverlay");
     const progressFill = document.getElementById("progressFill");
 
-    // Modal Buttons and Inputs
+
     const btnLocal = document.getElementById("btnLocal");
     const btnYoutube = document.getElementById("btnYoutube");
     const btnScreen = document.getElementById("btnScreen");
@@ -92,14 +92,14 @@
 
     const hiddenFileInput = document.getElementById("hiddenFileInput");
 
-    // Join
+
     joinBtn.onclick = () => {
       const room = roomInput.value.trim();
       if (!room) return;
       window.location.href = "room.html?room=" + room;
     };
 
-    // Open Overlay
+
     openCreateOverlayBtn.onclick = () => {
       createTypeOverlay.style.display = "flex";
     };
@@ -108,7 +108,7 @@
       createTypeOverlay.style.display = "none";
     };
 
-    // Local
+
     btnLocal.onclick = () => {
       createTypeOverlay.style.display = "none";
       hiddenFileInput.click();
@@ -127,7 +127,7 @@
       submitRoom(formData, true);
     };
 
-    // YouTube
+
     btnYoutube.onclick = () => {
       createTypeOverlay.style.display = "none";
       youtubeUrlOverlay.style.display = "flex";
@@ -170,7 +170,7 @@
       submitRoom(formData, false);
     };
 
-    // Screen Share
+
     btnScreen.onclick = () => {
       createTypeOverlay.style.display = "none";
       const formData = new FormData();
@@ -179,7 +179,7 @@
       submitRoom(formData, false);
     };
 
-    // Submission
+
     function submitRoom(formData, isLocalUpdate) {
       const xhr = new XMLHttpRequest();
       xhr.open("POST", `${BACKEND_URL}/create-room`, true);
