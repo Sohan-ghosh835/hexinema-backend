@@ -207,6 +207,22 @@ function initializeWebSocket() {
       }
     }
 
+    if (data.action === "request_sync") {
+      if (isHost) {
+        let currentTime = 0;
+        let isPlaying = false;
+        if (roomMediaType === "local") {
+          currentTime = video.currentTime;
+          isPlaying = !video.paused;
+        } else if (roomMediaType === "youtube" && isYtReady) {
+          currentTime = ytPlayer.getCurrentTime();
+          isPlaying = ytPlayer.getPlayerState() === YT.PlayerState.PLAYING;
+        }
+        sendSync(isPlaying, currentTime);
+      }
+      return;
+    }
+
     if (data.action === "stream_ready") {
       if (!isHost && roomMediaType === "screen") {
         ws.send(JSON.stringify({ action: "request_stream", clientId }));

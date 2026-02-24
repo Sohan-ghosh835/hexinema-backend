@@ -24,11 +24,17 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
             "role": "viewer"
         })
 
-    for client in room["clients"]:
         await client.send_json({
             "type": "count",
             "count": len(room["clients"])
         })
+    
+    # If a new viewer joins, ask the host to send a sync message
+    if room.get("host") and websocket != room["host"]:
+        try:
+            await room["host"].send_json({"action": "request_sync"})
+        except:
+            pass
 
     try:
         while True:
@@ -38,9 +44,18 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                 await websocket.send_json({"action": "pong"})
                 continue
 
+            # Safe broadcasting
+            dead_clients = set()
             for client in room["clients"]:
                 if client != websocket:
-                    await client.send_json(data)
+                    try:
+                        await client.send_json(data)
+                    except:
+                        dead_clients.add(client)
+            
+            for dead in dead_clients:
+                if dead in room["clients"]:
+                    room["clients"].remove(dead)
 
     except WebSocketDisconnect:
         if websocket in room["clients"]:
