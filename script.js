@@ -247,7 +247,7 @@ function initializeWebSocket() {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ action: "ping" }));
       }
-    }, 30000);
+    }, 10000);
 
     if (!isHost && roomMediaType === "screen") {
       ws.send(JSON.stringify({ action: "request_stream", clientId }));
