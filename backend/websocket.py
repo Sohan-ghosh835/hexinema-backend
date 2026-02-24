@@ -33,6 +33,11 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
     try:
         while True:
             data = await websocket.receive_json()
+            
+            if data.get("action") == "ping":
+                await websocket.send_json({"action": "pong"})
+                continue
+
             for client in room["clients"]:
                 if client != websocket:
                     await client.send_json(data)

@@ -11,6 +11,17 @@ const nameBtn = document.getElementById("nameBtn");
 
 let ws;
 let isRemoteUpdate = false;
+let wsHeartbeat;
+
+function addStatusMessage(text, color = "gray") {
+  const msg = document.createElement("div");
+  msg.style.color = color;
+  msg.style.fontSize = "0.8em";
+  msg.style.fontStyle = "italic";
+  msg.innerHTML = `[System] ${text}`;
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+}
 
 const clientId = Math.random().toString(36).slice(2);
 const roomId = new URLSearchParams(window.location.search).get("room");
@@ -129,10 +140,17 @@ nameBtn.onclick = () => {
 };
 
 function initializeWebSocket() {
+  console.log("Connecting to WebSocket:", `${WS_URL}/ws/${roomId}`);
   ws = new WebSocket(`${WS_URL}/ws/${roomId}`);
 
   ws.onmessage = async (event) => {
-    const data = JSON.parse(event.data);
+    let data;
+    try {
+      data = JSON.parse(event.data);
+    } catch (e) {
+      console.error("Invalid JSON from server:", event.data);
+      return;
+    }
 
     if (data.type === "role") {
       isHost = data.role === "host";
@@ -195,6 +213,8 @@ function initializeWebSocket() {
       }
     }
 
+    if (data.action === "pong") return;
+
     if (data.chat) {
       messages.innerHTML += `<div><b>${data.user}:</b> ${data.chat}</div>`;
       messages.scrollTop = messages.scrollHeight;
@@ -202,10 +222,32 @@ function initializeWebSocket() {
   };
 
   ws.onopen = () => {
+    console.log("WebSocket connected!");
+    addStatusMessage("Connected to server.", "#4caf50");
+
+    // Heartbeat to keep connection alive on Render (every 30s)
+    if (wsHeartbeat) clearInterval(wsHeartbeat);
+    wsHeartbeat = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: "ping" }));
+      }
+    }, 30000);
 
     if (!isHost && roomMediaType === "screen") {
       ws.send(JSON.stringify({ action: "request_stream", clientId }));
     }
+  };
+
+  ws.onerror = (err) => {
+    console.error("WebSocket Error:", err);
+    addStatusMessage("Connection error. Is the backend running?", "#f44336");
+  };
+
+  ws.onclose = () => {
+    console.log("WebSocket closed.");
+    addStatusMessage("Disconnected from server. Reconnecting...", "#ff9800");
+    if (wsHeartbeat) clearInterval(wsHeartbeat);
+    setTimeout(initializeWebSocket, 3000); // Attempt reconnect in 3s
   };
 }
 
