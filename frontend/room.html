@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Hexinema</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+
+<body>
+
+  <div id="nameOverlay">
+    <div id="nameCard">
+      <h2>Enter your name</h2>
+      <input id="nameInput" type="text" />
+      <button id="nameBtn">Join</button>
+    </div>
+  </div>
+
+  <div id="topBar">Hexinema</div>
+
+  <div id="app">
+    <div id="videoArea">
+
+      <video id="video" controls style="display: none;"></video>
+
+      <div id="youtubeContainer" style="display: none; width: 95%; max-width: 1200px; aspect-ratio: 16/9;">
+        <div id="youtubePlayer"></div>
+      </div>
+
+      <video id="screenVideo" autoplay style="display: none;"></video>
+      <button id="startScreenShareBtn" style="display: none; margin-bottom: 20px;">Start Sharing Screen</button>
+
+      <div id="roomInfo">
+        <div class="infoBox" id="videoName"></div>
+        <div class="infoBox" id="userCount"></div>
+      </div>
+    </div>
+
+    <div id="chatPanel">
+      <div id="messages"></div>
+
+      <div id="chatInput">
+        <input id="msgInput" placeholder="Type a message" />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+
+      <div id="inviteContainer">
+        <button id="inviteBtn">Invite</button>
+
+        <div id="inviteMenu">
+          <button id="copyLinkBtn">Copy Invite Link</button>
+          <button id="copyCodeBtn">Copy Room Code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,380 @@
+console.log("script.js loaded");
+
+const BACKEND_URL = "http://127.0.0.1:8000"; // Change this to your Render URL
+const WS_URL = BACKEND_URL.replace(/^http/, 'ws');
+
+let username = sessionStorage.getItem("username");
+
+const overlay = document.getElementById("nameOverlay");
+const nameInput = document.getElementById("nameInput");
+const nameBtn = document.getElementById("nameBtn");
+
+let ws;
+let isRemoteUpdate = false;
+
+const clientId = Math.random().toString(36).slice(2);
+const roomId = new URLSearchParams(window.location.search).get("room");
+
+let roomMediaType = "local";
+let roomMediaSource = null;
+let isHost = false;
+
+// Local Video Elements
+const video = document.getElementById("video");
+const videoSource = document.getElementById("videoSource");
+// Youtube Elements
+const youtubeContainer = document.getElementById("youtubeContainer");
+let ytPlayer = null;
+let isYtReady = false;
+// Screen Share Elements
+const screenVideo = document.getElementById("screenVideo");
+const startScreenShareBtn = document.getElementById("startScreenShareBtn");
+let peerConnections = {};
+let localStream = null;
+
+const videoNameEl = document.getElementById("videoName");
+const userCountEl = document.getElementById("userCount");
+const messages = document.getElementById("messages");
+const input = document.getElementById("msgInput");
+
+async function loadRoomVideo() {
+  try {
+    const response = await fetch(`${BACKEND_URL}/room-info/${roomId}`);
+    const data = await response.json();
+    if (!data.media_type) return;
+
+    roomMediaType = data.media_type;
+    roomMediaSource = data.media_source;
+
+    if (roomMediaType === "local") {
+      video.style.display = "block";
+      video.src = `${BACKEND_URL}/video/${encodeURIComponent(roomMediaSource)}`;
+      videoNameEl.textContent = roomMediaSource;
+    } else if (roomMediaType === "youtube") {
+      youtubeContainer.style.display = "block";
+      videoNameEl.textContent = "YouTube Video";
+      initYoutube();
+    } else if (roomMediaType === "screen") {
+      screenVideo.style.display = "block";
+      videoNameEl.textContent = "Screen Share";
+    }
+
+  } catch {
+    alert("Failed to load room info");
+  }
+}
+
+function initYoutube() {
+  if (window.YT && window.YT.Player) {
+    createYtPlayer();
+  } else {
+    // Poll for YT.Player
+    const checkYT = setInterval(() => {
+      if (window.YT && window.YT.Player) {
+        clearInterval(checkYT);
+        createYtPlayer();
+      }
+    }, 100);
+  }
+}
+
+function createYtPlayer() {
+  ytPlayer = new YT.Player('youtubePlayer', {
+    height: '100%',
+    width: '100%',
+    videoId: roomMediaSource,
+    playerVars: {
+      'playsinline': 1,
+      'controls': 1
+    },
+    events: {
+      'onReady': onYtPlayerReady,
+      'onStateChange': onYtPlayerStateChange
+    }
+  });
+}
+
+function onYtPlayerReady(event) {
+  isYtReady = true;
+}
+
+function onYtPlayerStateChange(event) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (isRemoteUpdate) return;
+
+  if (event.data === YT.PlayerState.PLAYING) {
+    sendSync(true, ytPlayer.getCurrentTime());
+  } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.BUFFERING) {
+    sendSync(false, ytPlayer.getCurrentTime());
+  }
+}
+
+if (username) {
+  overlay.style.display = "none";
+  loadRoomVideo().then(() => {
+    initializeWebSocket();
+  });
+}
+
+nameBtn.onclick = () => {
+  const value = nameInput.value.trim();
+  if (!value) return;
+
+  username = value;
+  sessionStorage.setItem("username", username);
+  overlay.style.display = "none";
+  loadRoomVideo().then(() => {
+    initializeWebSocket();
+  });
+};
+
+function initializeWebSocket() {
+  ws = new WebSocket(`${WS_URL}/ws/${roomId}`);
+
+  ws.onmessage = async (event) => {
+    const data = JSON.parse(event.data);
+
+    if (data.type === "role") {
+      isHost = data.role === "host";
+      if (isHost && roomMediaType === "screen") {
+        startScreenShareBtn.style.display = "block";
+      }
+      return;
+    }
+
+    if (data.type === "count") {
+      const n = data.count;
+      userCountEl.textContent = n === 1 ? "1 person" : n + " people";
+      return;
+    }
+
+    if (data.action === "sync") {
+      if (data.clientId === clientId) return;
+
+      isRemoteUpdate = true;
+
+      if (roomMediaType === "local") {
+        if (Math.abs(video.currentTime - data.time) > 0.4) {
+          video.currentTime = data.time;
+        }
+        if (data.is_playing && video.paused) video.play();
+        if (!data.is_playing && !video.paused) video.pause();
+      } else if (roomMediaType === "youtube" && isYtReady) {
+        if (Math.abs(ytPlayer.getCurrentTime() - data.time) > 0.4) {
+          ytPlayer.seekTo(data.time, true);
+        }
+        if (data.is_playing) ytPlayer.playVideo();
+        else ytPlayer.pauseVideo();
+      }
+
+      setTimeout(() => { isRemoteUpdate = false; }, 250);
+    }
+
+    // WebRTC Signaling
+    if (data.action === "webrtc_offer") {
+      if (data.targetId !== clientId) return;
+      handleOffer(data.offer, data.senderId);
+    }
+    if (data.action === "webrtc_answer") {
+      if (data.targetId !== clientId) return;
+      handleAnswer(data.answer, data.senderId);
+    }
+    if (data.action === "webrtc_ice") {
+      if (data.targetId !== clientId) return;
+      handleIceCandidate(data.candidate, data.senderId);
+    }
+    if (data.action === "request_stream") {
+      if (isHost && roomMediaType === "screen" && localStream) {
+        createPeerConnection(data.clientId);
+      }
+    }
+
+    if (data.action === "stream_ready") {
+      if (!isHost && roomMediaType === "screen") {
+        ws.send(JSON.stringify({ action: "request_stream", clientId }));
+      }
+    }
+
+    if (data.chat) {
+      messages.innerHTML += `<div><b>${data.user}:</b> ${data.chat}</div>`;
+      messages.scrollTop = messages.scrollHeight;
+    }
+  };
+
+  ws.onopen = () => {
+    // If we join late as a viewer, ask the host for the stream
+    if (!isHost && roomMediaType === "screen") {
+      ws.send(JSON.stringify({ action: "request_stream", clientId }));
+    }
+  };
+}
+
+function sendSync(isPlaying, time) {
+  ws.send(JSON.stringify({
+    action: "sync",
+    is_playing: isPlaying,
+    time: time,
+    clientId
+  }));
+}
+
+video.onplay = () => {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (isRemoteUpdate) return;
+  sendSync(true, video.currentTime);
+};
+
+video.onpause = () => {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (isRemoteUpdate) return;
+  sendSync(false, video.currentTime);
+};
+
+video.onseeked = () => {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (isRemoteUpdate) return;
+  sendSync(!video.paused, video.currentTime);
+};
+
+// WebRTC Screen Sharing Logic
+
+startScreenShareBtn.onclick = async () => {
+  try {
+    localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+    screenVideo.srcObject = localStream;
+    startScreenShareBtn.style.display = "none";
+
+    ws.send(JSON.stringify({ action: "stream_ready", senderId: clientId }));
+  } catch (err) {
+    console.error("Error getting display media.", err);
+  }
+};
+
+const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+
+async function createPeerConnection(targetId) {
+  const pc = new RTCPeerConnection(rtcConfig);
+  peerConnections[targetId] = pc;
+
+  pc.onicecandidate = (event) => {
+    if (event.candidate) {
+      ws.send(JSON.stringify({
+        action: "webrtc_ice",
+        targetId: targetId,
+        senderId: clientId,
+        candidate: event.candidate
+      }));
+    }
+  };
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  }
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  ws.send(JSON.stringify({
+    action: "webrtc_offer",
+    targetId: targetId,
+    senderId: clientId,
+    offer: offer
+  }));
+}
+
+async function handleOffer(offer, senderId) {
+  const pc = new RTCPeerConnection(rtcConfig);
+  peerConnections[senderId] = pc;
+
+  pc.onicecandidate = (event) => {
+    if (event.candidate) {
+      ws.send(JSON.stringify({
+        action: "webrtc_ice",
+        targetId: senderId,
+        senderId: clientId,
+        candidate: event.candidate
+      }));
+    }
+  };
+
+  pc.ontrack = (event) => {
+    if (screenVideo.srcObject !== event.streams[0]) {
+      screenVideo.srcObject = event.streams[0];
+    }
+  };
+
+  await pc.setRemoteDescription(new RTCSessionDescription(offer));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  ws.send(JSON.stringify({
+    action: "webrtc_answer",
+    targetId: senderId,
+    senderId: clientId,
+    answer: answer
+  }));
+}
+
+async function handleAnswer(answer, senderId) {
+  const pc = peerConnections[senderId];
+  if (pc) {
+    await pc.setRemoteDescription(new RTCSessionDescription(answer));
+  }
+}
+
+async function handleIceCandidate(candidate, senderId) {
+  const pc = peerConnections[senderId];
+  if (pc) {
+    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+  }
+}
+
+function sendMessage() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  messages.innerHTML += `<div><b>You:</b> ${msg}</div>`;
+  messages.scrollTop = messages.scrollHeight;
+
+  ws.send(JSON.stringify({
+    chat: msg,
+    user: username
+  }));
+
+  input.value = "";
+}
+const inviteBtn = document.getElementById("inviteBtn");
+const inviteContainer = document.getElementById("inviteContainer");
+const inviteMenu = document.getElementById("inviteMenu");
+const copyLinkBtn = document.getElementById("copyLinkBtn");
+const copyCodeBtn = document.getElementById("copyCodeBtn");
+
+if (inviteBtn) {
+  inviteBtn.onclick = () => {
+    inviteMenu.style.display =
+      inviteMenu.style.display === "flex" ? "none" : "flex";
+  };
+}
+
+if (copyLinkBtn) {
+  copyLinkBtn.onclick = () => {
+    const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+    navigator.clipboard.writeText(link);
+    inviteMenu.style.display = "none";
+  };
+}
+
+if (copyCodeBtn) {
+  copyCodeBtn.onclick = () => {
+    navigator.clipboard.writeText(roomId);
+    inviteMenu.style.display = "none";
+  };
+}
+
+document.addEventListener("click", (e) => {
+  if (inviteContainer && !inviteContainer.contains(e.target)) {
+    inviteMenu.style.display = "none";
+  }
+});

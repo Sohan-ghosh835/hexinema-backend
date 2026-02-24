@@ -1,0 +1,418 @@
+@import url('https://fonts.googleapis.com/css2?family=Jersey+20&family=Ysabeau+Office:ital,wght@1,200&family=Big+Shoulders+Display:wght@100..900&display=swap');
+
+:root {
+  --accent: #E2C799;
+  --bg-deep: #08080a;
+  --border: rgba(255, 255, 255, 0.07);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Jersey 20', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-deep);
+  color: #f5f5f5;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "watchtogether";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: 30vw;
+  color: rgba(255, 255, 255, 0.012);
+  white-space: nowrap;
+  z-index: -1;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+}
+
+.landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.title {
+  font-family: 'Ysabeau Office', sans-serif;
+  font-weight: 200;
+  font-style: italic;
+  font-size: 48px;
+  letter-spacing: 6px;
+  color: var(--accent);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  font-size: 20px;
+  margin-bottom: 40px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.card {
+  width: 420px;
+  padding: 40px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(30px);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.section h3 {
+  font-size: 22px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.section input {
+  padding: 14px;
+  font-size: 18px;
+  background: #000;
+  border: 1px solid var(--border);
+  color: var(--accent);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal {
+  width: 380px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+}
+
+.modal h3 {
+  font-family: 'Ysabeau Office', sans-serif;
+  font-style: italic;
+  font-size: 24px;
+  color: var(--accent);
+  margin: 0 0 10px 0;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.modal input {
+  padding: 14px;
+  font-size: 18px;
+  background: #000;
+  border: 1px solid var(--border);
+  color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+.modal input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.modal-btn {
+  width: 100%;
+}
+
+.modal-btn.cancel {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.modal-btn.cancel:hover {
+  color: #fff;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.divider {
+  text-align: center;
+  font-size: 16px;
+  opacity: 0.4;
+}
+
+#topBar {
+  position: fixed;
+  top: 25px;
+  left: 30px;
+  font-family: 'Ysabeau Office', sans-serif;
+  font-weight: 200;
+  font-style: italic;
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--accent);
+  z-index: 100;
+}
+
+#app {
+  height: 100vh;
+  display: flex;
+}
+
+#videoArea {
+  flex: 1;
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#video {
+  width: 95%;
+  max-width: 1200px;
+  border-radius: 2px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--border);
+  background: #000;
+  transition: transform 0.4s ease;
+}
+
+#video:hover {
+  transform: scale(1.005);
+}
+
+#screenVideo,
+#youtubeContainer {
+  width: 95%;
+  max-width: 1200px;
+  border-radius: 2px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+  border: 1px solid var(--border);
+  background: #000;
+  transition: transform 0.4s ease;
+  aspect-ratio: 16/9;
+}
+
+#screenVideo:hover,
+#youtubeContainer:hover {
+  transform: scale(1.005);
+}
+
+#roomInfo {
+  margin-top: 25px;
+  display: flex;
+  gap: 15px;
+}
+
+.infoBox {
+  padding: 6px 20px;
+  font-size: 18px;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  text-transform: uppercase;
+}
+
+#chatPanel {
+  width: 350px;
+  padding: 25px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(30px);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 20px;
+}
+
+#messages div {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+#chatInput {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#msgInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff;
+  border: 1px solid var(--border);
+  padding: 12px;
+  font-size: 18px;
+}
+
+#msgInput:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+button {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 18px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: #fff;
+  box-shadow: 0 0 20px rgba(226, 199, 153, 0.4);
+}
+
+#inviteBtn {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+#nameOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#nameCard {
+  border: 1px solid var(--border);
+  padding: 50px;
+  width: 450px;
+  text-align: center;
+  background: #0d0d0f;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
+}
+
+#nameCard h2 {
+  font-family: 'Ysabeau Office', sans-serif;
+  font-weight: 200;
+  font-style: italic;
+  text-transform: uppercase;
+  color: #fff;
+  font-size: 22px;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+#nameInput {
+  width: 100%;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #000;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 24px;
+  text-align: center;
+}
+
+#nameBtn {
+  width: 100%;
+}
+
+#inviteContainer {
+  position: relative;
+  width: 100%;
+}
+
+#inviteBtn {
+  width: 100%;
+}
+
+#inviteMenu {
+  position: absolute;
+  top: -110px;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid var(--border);
+  z-index: 200;
+}
+
+#inviteMenu button {
+  background: transparent;
+  color: var(--accent);
+  border: none;
+  border-bottom: 1px solid var(--border);
+}
+
+#inviteMenu button:last-child {
+  border-bottom: none;
+}
+
+#inviteMenu button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+#uploadOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+#uploadBox {
+  width: 500px;
+  border: 1px solid var(--border);
+  padding: 40px;
+  background: #0d0d0f;
+  text-align: center;
+}
+
+#uploadText {
+  margin-bottom: 25px;
+  font-size: 22px;
+  color: var(--accent);
+}
+
+#progressBar {
+  width: 100%;
+  height: 20px;
+  border: 1px solid var(--border);
+}
+
+#progressFill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+}
