@@ -403,6 +403,16 @@ function sendMessage() {
 
   input.value = "";
 }
+
+// Add Enter key support for chat
+if (input) {
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  });
+}
+
 const inviteBtn = document.getElementById("inviteBtn");
 const inviteContainer = document.getElementById("inviteContainer");
 const inviteMenu = document.getElementById("inviteMenu");
