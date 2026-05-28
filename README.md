@@ -1,6 +1,7 @@
 # Hexinema
 
 Hexinema is a high-performance, real-time platform designed for synchronized media consumption. It allows users to create virtual rooms where they can watch local videos, YouTube content, or share their screens with others in perfect synchronization, ensuring a seamless "no desync" experience.
+https://sohan-ghosh835.github.io/hexinema-backend/
 
 ## Features
 
