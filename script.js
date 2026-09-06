@@ -220,7 +220,6 @@ function initializeWebSocket() {
       setTimeout(() => { isRemoteUpdate = false; }, 250);
     }
 
-
     if (data.action === "webrtc_offer") {
       if (data.targetId !== clientId) return;
       handleOffer(data.offer, data.senderId);
@@ -326,8 +325,6 @@ video.onseeked = () => {
   if (isRemoteUpdate) return;
   sendSync(!video.paused, video.currentTime);
 };
-
-
 
 startScreenShareBtn.onclick = async () => {
   try {

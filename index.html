@@ -29,18 +29,15 @@
       --black-elevated: #17171b;
       --black-elevated-2: #1e1e23;
 
-
       --chrome-100: #f6f6f8;
       --chrome-300: #cfd1d6;
       --chrome-500: #9a9da5;
       --chrome-700: #5c5f66;
       --chrome-900: #2a2b30;
 
-
       --red: #b3122b;
       --red-bright: #e0263f;
       --red-dim: #6e0f21;
-
 
       --text-hi: #f2f2f4;
       --text-mid: #b7b9c0;
@@ -54,7 +51,6 @@
 
       --ease: cubic-bezier(.22, .61, .36, 1);
     }
-
 
     html.lenis,
     html.lenis body {
@@ -72,7 +68,6 @@
     .lenis.lenis-stopped {
       overflow: hidden;
     }
-
 
     * {
       box-sizing: border-box;
@@ -132,7 +127,6 @@
       outline-offset: 3px;
     }
 
-
     body.landing-body::before {
       content: '';
       position: fixed;
@@ -143,7 +137,6 @@
         repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0px, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 3px);
       mix-blend-mode: overlay;
     }
-
 
     .chrome-text,
     .hero-title,
@@ -162,7 +155,6 @@
       -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
     }
-
 
     .nav {
       position: sticky;
@@ -244,7 +236,6 @@
       border-color: var(--line-red);
       background: linear-gradient(180deg, var(--black-elevated-2), var(--black-elevated));
     }
-
 
     .hero {
       position: relative;
@@ -366,14 +357,12 @@
       z-index: 1;
     }
 
-    /* RED BUTTON: Solid Red Inside */
     .btn-primary,
     #openCreateOverlayBtn {
       background-color: #b3122b !important;
       color: #fff !important;
     }
 
-    /* BLACK BUTTON: Solid Black Inside */
     .btn-ghost,
     #joinBtn {
       background-color: #08080a !important;
@@ -381,7 +370,6 @@
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
     }
 
-    /* RED BUTTON STEAM BORDER GRADIENT */
     .btn-primary::before,
     #openCreateOverlayBtn::before {
       background: linear-gradient(
@@ -397,7 +385,6 @@
       background-size: 400%;
     }
 
-    /* BLACK BUTTON STEAM BORDER GRADIENT */
     .btn-ghost::before,
     #joinBtn::before {
       background: linear-gradient(
@@ -413,7 +400,6 @@
       background-size: 400%;
     }
 
-    /* Hollow Steam Border Outline ONLY (1.5px ring on outer border edge) */
     .btn-primary::before,
     .btn-ghost::before,
     #joinBtn::before,
@@ -433,7 +419,6 @@
       animation: steam 16s linear infinite;
     }
 
-    /* Trigger animated steam border on hover */
     .btn-primary:hover::before,
     .btn-ghost:hover::before,
     #joinBtn:hover::before,
@@ -441,7 +426,6 @@
       opacity: 1;
     }
 
-    /* SUBTLE OUTER GLOW ON HOVER (Reddish & White themed outer aura) */
     .btn-primary:hover,
     #openCreateOverlayBtn:hover {
       box-shadow: 0 0 25px 3px rgba(224, 38, 63, 0.55), 0 0 10px 1px rgba(255, 255, 255, 0.45) !important;
@@ -465,7 +449,6 @@
         background-position: 0 0;
       }
     }
-
 
     .hv-bezel-wrap {
       position: absolute;
@@ -652,7 +635,6 @@
       font-size: 0.6rem;
     }
 
-
     .showcase {
       position: relative;
       background: var(--black);
@@ -795,7 +777,6 @@
       }
     }
 
-
     .section-wrap {
       max-width: 1180px;
       margin: 0 auto;
@@ -817,7 +798,6 @@
       line-height: 1.15;
       max-width: 20ch;
     }
-
 
     .feat-grid {
       margin-top: 56px;
@@ -882,7 +862,6 @@
       max-width: 32ch;
     }
 
-
     .steps {
       margin-top: 56px;
       display: flex;
@@ -917,7 +896,6 @@
       line-height: 1.6;
       max-width: 30ch;
     }
-
 
     .launch .card {
       margin-top: 48px;
@@ -1006,7 +984,6 @@
       color: var(--text-low);
     }
 
-
     .footer-modern {
       position: relative;
       margin-top: 40px;
@@ -1091,7 +1068,6 @@
       color: var(--red-bright);
     }
 
-
     .overlay {
       position: fixed;
       inset: 0;
@@ -1155,7 +1131,6 @@
       color: var(--text-mid);
     }
 
-
     #uploadOverlay {
       display: none;
       position: fixed;
@@ -1197,7 +1172,6 @@
       background: linear-gradient(90deg, var(--red), var(--red-bright));
       transition: width .15s linear;
     }
-
 
     .reveal {
       opacity: 0;
@@ -1246,7 +1220,6 @@
         transform: translateY(0) scale(1);
       }
     }
-
 
     @media (max-width: 860px) {
       .feat-grid {
@@ -1300,7 +1273,6 @@
         width: 100%;
       }
 
-
       .hv-window {
         width: 100%;
         height: 100%;
@@ -1340,7 +1312,6 @@
       }
     }
 
-
     @media (prefers-reduced-motion: reduce) {
       html {
         scroll-behavior: auto;
@@ -1364,7 +1335,6 @@
 
 <body class="landing-body">
 
-
   <nav class="nav" id="mainNav">
     <a class="nav-logo" href="#">Hexinema</a>
     <div class="nav-links">
@@ -1379,7 +1349,6 @@
       GitHub
     </a>
   </nav>
-
 
   <section class="hero" id="hero">
 
@@ -1403,13 +1372,11 @@
     </div>
   </section>
 
-
   <section class="showcase" id="showcase">
     <div class="se-track" id="seTrack">
       <div class="se-stage" id="seStage">
         <div class="se-frame" id="seFrame">
           <div class="se-media" id="seMedia"></div>
-
 
           <div class="hv-bezel-wrap" id="hvBezel">
             <div class="hv-window">
@@ -1443,7 +1410,6 @@
       </div>
     </div>
   </section>
-
 
   <section class="section-wrap" id="features">
     <p class="label reveal">Features</p>
@@ -1482,7 +1448,6 @@
     </div>
   </section>
 
-
   <section class="section-wrap" id="how">
     <p class="label reveal">How it works</p>
     <h2 class="section-heading reveal">Three steps to your<br />perfect watch party.</h2>
@@ -1505,7 +1470,6 @@
     </div>
   </section>
 
-
   <section class="section-wrap launch" id="launch">
     <p class="label reveal">Launch</p>
     <h2 class="section-heading reveal">Ready to watch?</h2>
@@ -1522,7 +1486,6 @@
       </div>
     </div>
   </section>
-
 
   <footer class="footer-modern">
     <div class="footer-blur-line"></div>
@@ -1555,7 +1518,6 @@
     </div>
   </footer>
 
-
   <div id="createTypeOverlay" class="overlay" style="display:none">
     <div class="modal">
       <h3>Select Media Type</h3>
@@ -1582,7 +1544,6 @@
       </div>
     </div>
   </div>
-
 
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
 
