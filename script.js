@@ -29,15 +29,32 @@ const roomId = new URLSearchParams(window.location.search).get("room");
 let roomMediaType = "local";
 let roomMediaSource = null;
 let isHost = false;
+let pendingSync = null;
 
-// Local Video Elements
+const mobileChatToggle = document.getElementById("mobileChatToggle");
+const chatPanel = document.getElementById("chatPanel");
+const appEl = document.getElementById("app");
+if (mobileChatToggle && chatPanel) {
+  mobileChatToggle.onclick = () => {
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+    if (isLandscape) {
+      chatPanel.classList.remove("mobile-hidden");
+      chatPanel.classList.toggle("mobile-open");
+      chatPanel.classList.toggle("mobile-visible");
+    } else {
+      chatPanel.classList.remove("mobile-open");
+      chatPanel.classList.remove("mobile-visible");
+      chatPanel.classList.toggle("mobile-hidden");
+      if (appEl) appEl.classList.toggle("chat-collapsed");
+    }
+  };
+}
+
 const video = document.getElementById("video");
 const videoSource = document.getElementById("videoSource");
-// Youtube Elements
 const youtubeContainer = document.getElementById("youtubeContainer");
 let ytPlayer = null;
 let isYtReady = false;
-// Screen Share Elements
 const screenVideo = document.getElementById("screenVideo");
 const startScreenShareBtn = document.getElementById("startScreenShareBtn");
 let peerConnections = {};
@@ -107,6 +124,17 @@ function createYtPlayer() {
 
 function onYtPlayerReady(event) {
   isYtReady = true;
+  if (pendingSync) {
+    const s = pendingSync;
+    pendingSync = null;
+    isRemoteUpdate = true;
+    if (Math.abs(ytPlayer.getCurrentTime() - s.time) > 0.4) {
+      ytPlayer.seekTo(s.time, true);
+    }
+    if (s.is_playing) ytPlayer.playVideo();
+    else ytPlayer.pauseVideo();
+    setTimeout(() => { isRemoteUpdate = false; }, 250);
+  }
 }
 
 function onYtPlayerStateChange(event) {
@@ -177,12 +205,16 @@ function initializeWebSocket() {
         }
         if (data.is_playing && video.paused) video.play();
         if (!data.is_playing && !video.paused) video.pause();
-      } else if (roomMediaType === "youtube" && isYtReady) {
-        if (Math.abs(ytPlayer.getCurrentTime() - data.time) > 0.4) {
-          ytPlayer.seekTo(data.time, true);
+      } else if (roomMediaType === "youtube") {
+        if (isYtReady) {
+          if (Math.abs(ytPlayer.getCurrentTime() - data.time) > 0.4) {
+            ytPlayer.seekTo(data.time, true);
+          }
+          if (data.is_playing) ytPlayer.playVideo();
+          else ytPlayer.pauseVideo();
+        } else {
+          pendingSync = { is_playing: data.is_playing, time: data.time };
         }
-        if (data.is_playing) ytPlayer.playVideo();
-        else ytPlayer.pauseVideo();
       }
 
       setTimeout(() => { isRemoteUpdate = false; }, 250);
@@ -241,7 +273,6 @@ function initializeWebSocket() {
     console.log("WebSocket connected!");
     addStatusMessage("Connected to server.", "#4caf50");
 
-    // Heartbeat to keep connection alive on Render (every 30s)
     if (wsHeartbeat) clearInterval(wsHeartbeat);
     wsHeartbeat = setInterval(() => {
       if (ws.readyState === WebSocket.OPEN) {
@@ -250,7 +281,9 @@ function initializeWebSocket() {
     }, 10000);
 
     if (!isHost && roomMediaType === "screen") {
-      ws.send(JSON.stringify({ action: "request_stream", clientId }));
+      setTimeout(() => {
+        ws.send(JSON.stringify({ action: "request_stream", clientId }));
+      }, 500);
     }
   };
 
@@ -263,7 +296,7 @@ function initializeWebSocket() {
     console.log("WebSocket closed.");
     addStatusMessage("Disconnected from server. Reconnecting...", "#ff9800");
     if (wsHeartbeat) clearInterval(wsHeartbeat);
-    setTimeout(initializeWebSocket, 3000); // Attempt reconnect in 3s
+    setTimeout(initializeWebSocket, 3000);
   };
 }
 
@@ -404,7 +437,6 @@ function sendMessage() {
   input.value = "";
 }
 
-// Add Enter key support for chat
 if (input) {
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
